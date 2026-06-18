@@ -1,0 +1,58 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Agent {
+  id          String     @id @default(uuid())
+  name        String
+  email       String     @unique
+  phone       String?
+  is_admin    Boolean    @default(false)
+  listings    Property[]
+  created_at  DateTime   @default(now())
+  updated_at  DateTime   @updatedAt
+
+  @@map("agents")
+}
+
+model Property {
+  id              String        @id @default(uuid())
+  title           String
+  description     String
+  price           Int
+  suburb          String
+  state           String
+  postcode        String
+  address         String
+  property_type   PropertyType
+  bedrooms        Int
+  bathrooms       Int
+  parking         Int           @default(0)
+  land_size       Float?
+  internal_status String?       // admin-only field
+  agent_id        String
+  agent           Agent         @relation(fields: [agent_id], references: [id])
+  created_at      DateTime      @default(now())
+  updated_at      DateTime      @updatedAt
+
+  @@index([price])
+  @@index([suburb])
+  @@index([property_type])
+  @@index([bedrooms])
+  @@index([bathrooms])
+  @@index([suburb, price])
+  @@map("properties")
+}
+
+enum PropertyType {
+  HOUSE
+  APARTMENT
+  TOWNHOUSE
+  LAND
+  COMMERCIAL
+}
