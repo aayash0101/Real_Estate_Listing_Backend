@@ -14,9 +14,13 @@ export async function getListings(
 ): Promise<void> {
   try {
     const isAdmin = req.agent?.is_admin ?? false;
+    const wantsMine = req.query.mine === "true";
+    const agentId = wantsMine && req.agent ? req.agent.id : undefined;
+
     const result = await searchListings(
       req.query as Record<string, string>,
-      isAdmin
+      isAdmin,
+      agentId
     );
     res.json({ success: true, data: result });
   } catch (error) {
