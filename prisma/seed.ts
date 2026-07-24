@@ -1,6 +1,8 @@
 import { PrismaClient, PropertyType } from "@prisma/client";
+import bcrypt from 'bcryptjs';
 
 const prisma = new PrismaClient();
+const passwordHash = await bcrypt.hash('password123', 10);
 
 async function main() {
   console.log("🌱 Seeding database...");
