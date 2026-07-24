@@ -41,6 +41,15 @@ const AGENT_SELECT = {
   is_admin: false,
 };
 
+const IMAGES_SELECT = {
+  select: {
+    id: true,
+    url: true,
+    order: true,
+  },
+  orderBy: { order: "asc" as const },
+};
+
 const BASE_PROPERTY_SELECT = {
   id: true,
   title: true,
@@ -57,6 +66,7 @@ const BASE_PROPERTY_SELECT = {
   land_size: true,
   created_at: true,
   agent: { select: AGENT_SELECT },
+  images: IMAGES_SELECT,
 };
 
 const ADMIN_PROPERTY_SELECT = {
@@ -151,4 +161,36 @@ export async function findListingOwnerId(id: string): Promise<string | null> {
     select: { agent_id: true },
   });
   return property?.agent_id ?? null;
+}
+
+// ---- Images ----
+
+export async function createPropertyImages(propertyId: string, urls: string[]) {
+  const existingCount = await prisma.propertyImage.count({
+    where: { property_id: propertyId },
+  });
+
+  const data = urls.map((url, i) => ({
+    url,
+    order: existingCount + i,
+    property_id: propertyId,
+  }));
+
+  await prisma.propertyImage.createMany({ data });
+
+  return prisma.propertyImage.findMany({
+    where: { property_id: propertyId },
+    orderBy: { order: "asc" },
+  });
+}
+
+export async function findImageById(imageId: string) {
+  return prisma.propertyImage.findUnique({
+    where: { id: imageId },
+    include: { property: { select: { id: true, agent_id: true } } },
+  });
+}
+
+export async function deletePropertyImage(imageId: string) {
+  return prisma.propertyImage.delete({ where: { id: imageId } });
 }
