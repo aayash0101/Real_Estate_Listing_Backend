@@ -89,3 +89,107 @@ export function validateListingQuery(
 
   next();
 }
+
+export function validatePropertyBody(
+  req: Request,
+  res: Response,
+  next: NextFunction
+): void {
+  const {
+    title,
+    description,
+    price,
+    suburb,
+    state,
+    postcode,
+    address,
+    property_type,
+    bedrooms,
+    bathrooms,
+    parking,
+  } = req.body;
+
+  const requiredStrings: Record<string, unknown> = {
+    title,
+    description,
+    suburb,
+    state,
+    postcode,
+    address,
+  };
+
+  for (const [field, value] of Object.entries(requiredStrings)) {
+    if (typeof value !== "string" || value.trim().length === 0) {
+      res.status(400).json({ success: false, message: `${field} is required` });
+      return;
+    }
+  }
+
+  if (typeof price !== "number" || price < 0) {
+    res.status(400).json({ success: false, message: "price must be a non-negative number" });
+    return;
+  }
+
+  if (!VALID_PROPERTY_TYPES.includes(property_type)) {
+    res.status(400).json({
+      success: false,
+      message: `property_type must be one of: ${VALID_PROPERTY_TYPES.join(", ")}`,
+    });
+    return;
+  }
+
+  if (typeof bedrooms !== "number" || bedrooms < 0) {
+    res.status(400).json({ success: false, message: "bedrooms must be a non-negative number" });
+    return;
+  }
+
+  if (typeof bathrooms !== "number" || bathrooms < 0) {
+    res.status(400).json({ success: false, message: "bathrooms must be a non-negative number" });
+    return;
+  }
+
+  if (parking !== undefined && (typeof parking !== "number" || parking < 0)) {
+    res.status(400).json({ success: false, message: "parking must be a non-negative number" });
+    return;
+  }
+
+  next();
+}
+
+export function validatePropertyUpdateBody(
+  req: Request,
+  res: Response,
+  next: NextFunction
+): void {
+  const { price, property_type, bedrooms, bathrooms, parking } = req.body;
+
+  if (price !== undefined && (typeof price !== "number" || price < 0)) {
+    res.status(400).json({ success: false, message: "price must be a non-negative number" });
+    return;
+  }
+
+  if (property_type !== undefined && !VALID_PROPERTY_TYPES.includes(property_type)) {
+    res.status(400).json({
+      success: false,
+      message: `property_type must be one of: ${VALID_PROPERTY_TYPES.join(", ")}`,
+    });
+    return;
+  }
+
+  if (bedrooms !== undefined && (typeof bedrooms !== "number" || bedrooms < 0)) {
+    res.status(400).json({ success: false, message: "bedrooms must be a non-negative number" });
+    return;
+  }
+
+  if (bathrooms !== undefined && (typeof bathrooms !== "number" || bathrooms < 0)) {
+    res.status(400).json({ success: false, message: "bathrooms must be a non-negative number" });
+    return;
+  }
+
+  if (parking !== undefined && (typeof parking !== "number" || parking < 0)) {
+    res.status(400).json({ success: false, message: "parking must be a non-negative number" });
+    return;
+  }
+
+  next();
+}
