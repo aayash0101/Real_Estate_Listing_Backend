@@ -18,7 +18,7 @@ const AGENT_SELECT = {
   name: true,
   email: true,
   phone: true,
-  is_admin: false, // never expose this
+  is_admin: false,
 };
 
 const BASE_PROPERTY_SELECT = {
@@ -37,7 +37,6 @@ const BASE_PROPERTY_SELECT = {
   land_size: true,
   created_at: true,
   agent: { select: AGENT_SELECT },
-  // internal_status excluded by default
 };
 
 const ADMIN_PROPERTY_SELECT = {
@@ -45,10 +44,7 @@ const ADMIN_PROPERTY_SELECT = {
   internal_status: true,
 };
 
-export async function findListings(
-  filters: ListingFilters,
-  isAdmin: boolean
-) {
+export async function findListings(filters: ListingFilters, isAdmin: boolean) {
   const {
     price_min,
     price_max,
@@ -72,8 +68,9 @@ export async function findListings(
           },
         }
       : {}),
-    ...(bedrooms !== undefined && { bedrooms }),
-    ...(bathrooms !== undefined && { bathrooms }),
+    // ✅ FIXED: gte instead of exact match
+    ...(bedrooms !== undefined && { bedrooms: { gte: bedrooms } }),
+    ...(bathrooms !== undefined && { bathrooms: { gte: bathrooms } }),
     ...(property_type && { property_type }),
     ...(suburb && {
       suburb: { contains: suburb, mode: "insensitive" as const },
