@@ -3,6 +3,7 @@ import cors from "cors";
 import { authMiddleware } from "./middleware/auth.middleware";
 import { errorHandler, notFoundHandler } from "./middleware/error.middleware";
 import listingRoutes from "./listings/listing.routes";
+import agentRoutes from './routes/agent.routes';
 
 const app = express();
 
@@ -20,6 +21,7 @@ app.get("/health", (_req, res) => {
 });
 
 app.use("/listings", listingRoutes);
+app.use('/agents', agentRoutes);
 
 app.use(notFoundHandler);
 
