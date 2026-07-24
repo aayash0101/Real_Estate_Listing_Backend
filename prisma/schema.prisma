@@ -8,16 +8,38 @@ datasource db {
 }
 
 model Agent {
-  id          String     @id @default(uuid())
-  name        String
-  email       String     @unique
-  phone       String?
-  is_admin    Boolean    @default(false)
-  listings    Property[]
-  created_at  DateTime   @default(now())
-  updated_at  DateTime   @updatedAt
-
+  id            String     @id @default(uuid())
+  name          String
+  email         String     @unique
+  phone         String?
+  password_hash String
+  is_admin      Boolean    @default(false)
+  listings      Property[]
+  created_at    DateTime   @default(now())
+  updated_at    DateTime   @updatedAt
   @@map("agents")
+}
+
+model User {
+  id            String     @id @default(uuid())
+  name          String
+  email         String     @unique
+  password_hash String
+  favorites     Favorite[]
+  created_at    DateTime   @default(now())
+  updated_at    DateTime   @updatedAt
+  @@map("users")
+}
+
+model Favorite {
+  id          String   @id @default(uuid())
+  user_id     String
+  user        User     @relation(fields: [user_id], references: [id])
+  property_id String
+  property    Property @relation(fields: [property_id], references: [id])
+  created_at  DateTime @default(now())
+  @@unique([user_id, property_id])
+  @@map("favorites")
 }
 
 model Property {
@@ -37,9 +59,9 @@ model Property {
   internal_status String?       // admin-only field
   agent_id        String
   agent           Agent         @relation(fields: [agent_id], references: [id])
+  favorites       Favorite[]
   created_at      DateTime      @default(now())
   updated_at      DateTime      @updatedAt
-
   @@index([price])
   @@index([suburb])
   @@index([property_type])
