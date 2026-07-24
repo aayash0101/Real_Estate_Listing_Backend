@@ -38,7 +38,11 @@ function toPropertyType(val: string | undefined): PropertyType | undefined {
   return undefined;
 }
 
-export async function searchListings(params: RawQueryParams, isAdmin: boolean) {
+export async function searchListings(
+  params: RawQueryParams,
+  isAdmin: boolean,
+  agentId?: string
+) {
   const filters: ListingFilters = {
     price_min: toInt(params.price_min),
     price_max: toInt(params.price_max),
@@ -47,6 +51,7 @@ export async function searchListings(params: RawQueryParams, isAdmin: boolean) {
     property_type: toPropertyType(params.property_type),
     suburb: params.suburb,
     keyword: params.keyword,
+    agent_id: agentId,
     page: toInt(params.page) ?? 1,
     limit: Math.min(toInt(params.limit) ?? 10, 50),
   };
