@@ -1,5 +1,15 @@
 import { PropertyType } from "@prisma/client";
-import { findListings, findListingById, ListingFilters } from "./listing.repository";
+import {
+  findListings,
+  findListingById,
+  createListing as createListingRepo,
+  updateListing as updateListingRepo,
+  deleteListing as deleteListingRepo,
+  findListingOwnerId,
+  ListingFilters,
+  CreateListingInput,
+  UpdateListingInput,
+} from "./listing.repository";
 
 export interface RawQueryParams {
   price_min?: string;
@@ -38,7 +48,7 @@ export async function searchListings(params: RawQueryParams, isAdmin: boolean) {
     suburb: params.suburb,
     keyword: params.keyword,
     page: toInt(params.page) ?? 1,
-    limit: Math.min(toInt(params.limit) ?? 10, 50), // cap at 50
+    limit: Math.min(toInt(params.limit) ?? 10, 50),
   };
 
   const { items, total } = await findListings(filters, isAdmin);
@@ -58,4 +68,43 @@ export async function getListingById(id: string, isAdmin: boolean) {
   const listing = await findListingById(id, isAdmin);
   if (!listing) return null;
   return listing;
+}
+
+export async function createListingForAgent(agentId: string, data: CreateListingInput) {
+  return createListingRepo({ ...data, agent_id: agentId });
+}
+
+export async function updateListingForAgent(
+  listingId: string,
+  requestingAgent: { id: string; is_admin: boolean },
+  data: UpdateListingInput
+) {
+  const ownerId = await findListingOwnerId(listingId);
+
+  if (!ownerId) {
+    throw new Error("NOT_FOUND");
+  }
+
+  if (ownerId !== requestingAgent.id && !requestingAgent.is_admin) {
+    throw new Error("FORBIDDEN");
+  }
+
+  return updateListingRepo(listingId, data);
+}
+
+export async function deleteListingForAgent(
+  listingId: string,
+  requestingAgent: { id: string; is_admin: boolean }
+) {
+  const ownerId = await findListingOwnerId(listingId);
+
+  if (!ownerId) {
+    throw new Error("NOT_FOUND");
+  }
+
+  if (ownerId !== requestingAgent.id && !requestingAgent.is_admin) {
+    throw new Error("FORBIDDEN");
+  }
+
+  return deleteListingRepo(listingId);
 }
