@@ -73,6 +73,7 @@ export async function findListings(filters: ListingFilters, isAdmin: boolean) {
     property_type,
     suburb,
     keyword,
+    agent_id,
     page = 1,
     limit = 10,
   } = filters;
@@ -94,6 +95,7 @@ export async function findListings(filters: ListingFilters, isAdmin: boolean) {
     ...(suburb && {
       suburb: { contains: suburb, mode: "insensitive" as const },
     }),
+    ...(agent_id && { agent_id }),
     ...(keyword && {
       OR: [
         { title: { contains: keyword, mode: "insensitive" as const } },
