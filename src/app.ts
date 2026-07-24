@@ -5,6 +5,7 @@ import { errorHandler, notFoundHandler } from "./middleware/error.middleware";
 import listingRoutes from "./listings/listing.routes";
 import agentRoutes from './routes/agent.routes';
 import authRoutes from './routes/auth.routes';
+import favoriteRoutes from "./favorites/favorite.routes";
 
 const app = express();
 
@@ -24,6 +25,7 @@ app.get("/health", (_req, res) => {
 app.use("/listings", listingRoutes);
 app.use('/agents', agentRoutes);
 app.use('/auth', authRoutes);
+app.use("/favorites", favoriteRoutes);
 
 app.use(notFoundHandler);
 
