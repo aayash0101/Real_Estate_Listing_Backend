@@ -4,6 +4,7 @@ import { authMiddleware } from "./middleware/auth.middleware";
 import { errorHandler, notFoundHandler } from "./middleware/error.middleware";
 import listingRoutes from "./listings/listing.routes";
 import agentRoutes from './routes/agent.routes';
+import authRoutes from './routes/auth.routes';
 
 const app = express();
 
@@ -22,6 +23,7 @@ app.get("/health", (_req, res) => {
 
 app.use("/listings", listingRoutes);
 app.use('/agents', agentRoutes);
+app.use('/auth', authRoutes);
 
 app.use(notFoundHandler);
 
