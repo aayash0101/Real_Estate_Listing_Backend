@@ -1,3 +1,5 @@
+import path from "path";
+import fs from "fs";
 import { PropertyType } from "@prisma/client";
 import {
   findListings,
@@ -6,6 +8,9 @@ import {
   updateListing as updateListingRepo,
   deleteListing as deleteListingRepo,
   findListingOwnerId,
+  createPropertyImages,
+  findImageById,
+  deletePropertyImage,
   ListingFilters,
   CreateListingInput,
   UpdateListingInput,
@@ -112,4 +117,46 @@ export async function deleteListingForAgent(
   }
 
   return deleteListingRepo(listingId);
+}
+
+
+export async function addListingImages(
+  listingId: string,
+  files: Express.Multer.File[],
+  requestingAgent: { id: string; is_admin: boolean }
+) {
+  const ownerId = await findListingOwnerId(listingId);
+
+  if (!ownerId) {
+    throw new Error("NOT_FOUND");
+  }
+
+  if (ownerId !== requestingAgent.id && !requestingAgent.is_admin) {
+    throw new Error("FORBIDDEN");
+  }
+
+  const urls = files.map((f) => `/uploads/listings/${f.filename}`);
+  return createPropertyImages(listingId, urls);
+}
+
+export async function removeListingImage(
+  imageId: string,
+  requestingAgent: { id: string; is_admin: boolean }
+) {
+  const image = await findImageById(imageId);
+
+  if (!image) {
+    throw new Error("NOT_FOUND");
+  }
+
+  if (image.property.agent_id !== requestingAgent.id && !requestingAgent.is_admin) {
+    throw new Error("FORBIDDEN");
+  }
+
+  const filePath = path.join(process.cwd(), image.url);
+  fs.unlink(filePath, () => {
+  });
+
+  await deletePropertyImage(imageId);
+  return { success: true };
 }
