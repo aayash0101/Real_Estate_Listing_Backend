@@ -6,12 +6,14 @@ import listingRoutes from "./listings/listing.routes";
 import agentRoutes from './routes/agent.routes';
 import authRoutes from './routes/auth.routes';
 import favoriteRoutes from "./favorites/favorite.routes";
+import path from "path";
 
 const app = express();
 
 app.use(cors());
 app.use(express.json());
 app.use(authMiddleware);
+app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
 
 app.get("/health", (_req, res) => {
   res.json({
