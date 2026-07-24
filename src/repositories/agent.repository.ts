@@ -12,7 +12,7 @@ export const agentRepository = {
         phone: true,
         is_admin: true,
         _count: {
-          select: { properties: true },
+          select: { listings: true },
         },
       },
       orderBy: { name: 'asc' },
@@ -27,7 +27,7 @@ export const agentRepository = {
         name: true,
         email: true,
         phone: true,
-        properties: {
+        listings: {
           select: {
             id: true,
             title: true,
