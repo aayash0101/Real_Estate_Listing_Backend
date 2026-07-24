@@ -13,6 +13,25 @@ export interface ListingFilters {
   limit?: number;
 }
 
+export interface CreateListingInput {
+  title: string;
+  description: string;
+  price: number;
+  suburb: string;
+  state: string;
+  postcode: string;
+  address: string;
+  property_type: PropertyType;
+  bedrooms: number;
+  bathrooms: number;
+  parking?: number;
+  land_size?: number;
+  internal_status?: string;
+  agent_id: string;
+}
+
+export type UpdateListingInput = Partial<Omit<CreateListingInput, "agent_id">>;
+
 const AGENT_SELECT = {
   id: true,
   name: true,
@@ -68,7 +87,6 @@ export async function findListings(filters: ListingFilters, isAdmin: boolean) {
           },
         }
       : {}),
-    // ✅ FIXED: gte instead of exact match
     ...(bedrooms !== undefined && { bedrooms: { gte: bedrooms } }),
     ...(bathrooms !== undefined && { bathrooms: { gte: bathrooms } }),
     ...(property_type && { property_type }),
@@ -103,4 +121,31 @@ export async function findListingById(id: string, isAdmin: boolean) {
     where: { id },
     select: isAdmin ? ADMIN_PROPERTY_SELECT : BASE_PROPERTY_SELECT,
   });
+}
+
+export async function createListing(data: CreateListingInput) {
+  return prisma.property.create({
+    data,
+    select: ADMIN_PROPERTY_SELECT, // return full shape (incl. internal_status) to the creating agent
+  });
+}
+
+export async function updateListing(id: string, data: UpdateListingInput) {
+  return prisma.property.update({
+    where: { id },
+    data,
+    select: ADMIN_PROPERTY_SELECT,
+  });
+}
+
+export async function deleteListing(id: string) {
+  return prisma.property.delete({ where: { id } });
+}
+
+export async function findListingOwnerId(id: string): Promise<string | null> {
+  const property = await prisma.property.findUnique({
+    where: { id },
+    select: { agent_id: true },
+  });
+  return property?.agent_id ?? null;
 }
