@@ -56,6 +56,7 @@ model Property {
   bathrooms       Int
   parking         Int           @default(0)
   land_size       Float?
+  images PropertyImage[]
   internal_status String?       // admin-only field
   agent_id        String
   agent           Agent         @relation(fields: [agent_id], references: [id])
@@ -69,6 +70,15 @@ model Property {
   @@index([bathrooms])
   @@index([suburb, price])
   @@map("properties")
+}
+
+model PropertyImage {
+  id          String   @id @default(uuid())
+  url         String
+  order       Int      @default(0)
+  property    Property @relation(fields: [property_id], references: [id], onDelete: Cascade)
+  property_id String
+  created_at  DateTime @default(now())
 }
 
 enum PropertyType {
