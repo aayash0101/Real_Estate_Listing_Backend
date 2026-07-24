@@ -9,6 +9,7 @@ export interface ListingFilters {
   property_type?: PropertyType;
   suburb?: string;
   keyword?: string;
+  agent_id?: string;
   page?: number;
   limit?: number;
 }
@@ -81,11 +82,11 @@ export async function findListings(filters: ListingFilters, isAdmin: boolean) {
   const where = {
     ...(price_min !== undefined || price_max !== undefined
       ? {
-          price: {
-            ...(price_min !== undefined && { gte: price_min }),
-            ...(price_max !== undefined && { lte: price_max }),
-          },
-        }
+        price: {
+          ...(price_min !== undefined && { gte: price_min }),
+          ...(price_max !== undefined && { lte: price_max }),
+        },
+      }
       : {}),
     ...(bedrooms !== undefined && { bedrooms: { gte: bedrooms } }),
     ...(bathrooms !== undefined && { bathrooms: { gte: bathrooms } }),
