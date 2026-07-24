@@ -5,6 +5,8 @@ import {
   createListingForAgent,
   updateListingForAgent,
   deleteListingForAgent,
+  addListingImages,
+  removeListingImage,
 } from "./listing.service";
 
 export async function getListings(
@@ -54,7 +56,6 @@ export async function createListing(
   next: NextFunction
 ): Promise<void> {
   try {
-    // req.agent is guaranteed non-null here by the requireAgent middleware on this route
     const listing = await createListingForAgent(req.agent!.id, req.body);
     res.status(201).json({ success: true, data: listing });
   } catch (error) {
@@ -101,6 +102,64 @@ export async function deleteListingHandler(
   } catch (error: any) {
     if (error.message === "NOT_FOUND") {
       res.status(404).json({ success: false, message: "Listing not found" });
+      return;
+    }
+    if (error.message === "FORBIDDEN") {
+      res.status(403).json({ success: false, message: "You do not own this listing" });
+      return;
+    }
+    next(error);
+  }
+}
+
+// ---- Images ----
+
+export async function uploadImages(
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> {
+  try {
+    const files = req.files as Express.Multer.File[];
+
+    if (!files || files.length === 0) {
+      res.status(400).json({ success: false, message: "No files uploaded" });
+      return;
+    }
+
+    const images = await addListingImages(req.params.id, files, {
+      id: req.agent!.id,
+      is_admin: req.agent!.is_admin,
+    });
+
+    res.status(201).json({ success: true, data: images });
+  } catch (error: any) {
+    if (error.message === "NOT_FOUND") {
+      res.status(404).json({ success: false, message: "Listing not found" });
+      return;
+    }
+    if (error.message === "FORBIDDEN") {
+      res.status(403).json({ success: false, message: "You do not own this listing" });
+      return;
+    }
+    next(error);
+  }
+}
+
+export async function deleteImage(
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> {
+  try {
+    const result = await removeListingImage(req.params.imageId, {
+      id: req.agent!.id,
+      is_admin: req.agent!.is_admin,
+    });
+    res.json({ success: true, data: result });
+  } catch (error: any) {
+    if (error.message === "NOT_FOUND") {
+      res.status(404).json({ success: false, message: "Image not found" });
       return;
     }
     if (error.message === "FORBIDDEN") {
