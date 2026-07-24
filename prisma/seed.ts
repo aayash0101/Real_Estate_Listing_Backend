@@ -2,10 +2,11 @@ import { PrismaClient, PropertyType } from "@prisma/client";
 import bcrypt from 'bcryptjs';
 
 const prisma = new PrismaClient();
-const passwordHash = await bcrypt.hash('password123', 10);
 
 async function main() {
   console.log("🌱 Seeding database...");
+
+  const passwordHash = await bcrypt.hash('password123', 10);
 
   // Clean existing data
   await prisma.property.deleteMany();
@@ -19,6 +20,7 @@ async function main() {
         email: "sarah.mitchell@realty.com",
         phone: "0412 345 678",
         is_admin: true,
+        password_hash: passwordHash,
       },
     }),
     prisma.agent.create({
@@ -27,6 +29,7 @@ async function main() {
         email: "james.thornton@realty.com",
         phone: "0423 456 789",
         is_admin: false,
+        password_hash: passwordHash,
       },
     }),
     prisma.agent.create({
@@ -35,6 +38,7 @@ async function main() {
         email: "emily.chen@realty.com",
         phone: "0434 567 890",
         is_admin: false,
+        password_hash: passwordHash,
       },
     }),
   ]);
