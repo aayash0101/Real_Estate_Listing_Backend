@@ -15,6 +15,7 @@ model Agent {
   password_hash String
   is_admin      Boolean    @default(false)
   listings      Property[]
+  inquiries Inquiry[]
   created_at    DateTime   @default(now())
   updated_at    DateTime   @updatedAt
   @@map("agents")
@@ -57,6 +58,7 @@ model Property {
   parking         Int           @default(0)
   land_size       Float?
   images PropertyImage[]
+  inquiries Inquiry[]
   internal_status String?       // admin-only field
   agent_id        String
   agent           Agent         @relation(fields: [agent_id], references: [id])
@@ -78,6 +80,19 @@ model PropertyImage {
   order       Int      @default(0)
   property    Property @relation(fields: [property_id], references: [id], onDelete: Cascade)
   property_id String
+  created_at  DateTime @default(now())
+}
+
+model Inquiry {
+  id          String   @id @default(uuid())
+  name        String
+  email       String
+  phone       String?
+  message     String
+  property    Property @relation(fields: [property_id], references: [id], onDelete: Cascade)
+  property_id String
+  agent       Agent    @relation(fields: [agent_id], references: [id])
+  agent_id    String
   created_at  DateTime @default(now())
 }
 
