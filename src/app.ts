@@ -7,6 +7,7 @@ import agentRoutes from './routes/agent.routes';
 import authRoutes from './routes/auth.routes';
 import favoriteRoutes from "./favorites/favorite.routes";
 import path from "path";
+import inquiryRoutes from "./inquiries/inquiry.routes";
 
 const app = express();
 
@@ -28,6 +29,7 @@ app.use("/listings", listingRoutes);
 app.use('/agents', agentRoutes);
 app.use('/auth', authRoutes);
 app.use("/favorites", favoriteRoutes);
+app.use("/", inquiryRoutes);
 
 app.use(notFoundHandler);
 
